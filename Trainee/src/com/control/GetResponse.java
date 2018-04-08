@@ -2,12 +2,17 @@ package com.control;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet implementation class GetResponse
@@ -50,17 +55,52 @@ public class GetResponse extends HttpServlet {
 		PrintWriter p = response.getWriter();
 		//select * from trainee where uname = 'admin' and password ='admin'
 		
+		
+		try{  
+			Class.forName("com.mysql.jdbc.Driver");  
+			Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/payilagam","root","");  
+			//here sonoo is database name, root is username and password  
+			Statement stmt=con.createStatement();  
+			ResultSet rs=stmt.executeQuery("select * from trainees where username='"+uname+"' and password ='"+pass+"'");  
+			if(rs.next())  
+			{
+				String name = rs.getString("name");
+				String email = rs.getString("email");
+				
+				/*
+				 * Creating the sessoin for logined user
+				 * set the value of name and email
+				 */
+				HttpSession hs = request.getSession();
+				hs.setAttribute("loggedinName", name);
+				hs.setAttribute("email", email);
+				
+				
+				
+				
+				response.sendRedirect("welcome.jsp");
+				
+			}else{
+				p.write("<h1 style='color:red'>Login Failed!!!!!</h1>");
+			}
+				
+			con.close();  
+			}catch(Exception e){ System.out.println(e);}  
+			  
+		
+		
+		/*
 		response.setContentType("text/html");
 		if(uname.equals("admin") && pass.equals("admin")){
 			
-			response.sendRedirect("success.html");
+			response.sendRedirect("welcome.jsp");
 			//p.write("<h1 style='color:green'>Authentication Success</h1>");
 			
 			
 		}else{
 			p.write("<h1 style='color:red'>Login Failed!!!!!</h1>");
 			
-		}
+		}*/
 		
 	}
 
